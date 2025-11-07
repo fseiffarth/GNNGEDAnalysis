@@ -1,0 +1,31 @@
+paths:
+  # define a specific path for each architecture
+  results:
+    "Examples/GED/Results/GIN/" # Results will be saved in this folder
+
+networks:
+- - { layer_type: gin_convolution,
+      bias: True,
+      out_channels: 64,
+      activation: torch.nn.Tanh(),
+}
+  - { layer_type: gin_convolution,
+      bias: True,
+      out_channels: 64,
+      activation: torch.nn.Tanh(),
+}
+  - { layer_type: global_pooling,
+        mode: mean,
+    }
+  - { layer_type: linear,
+      out_features: 32,
+      bias: True,
+      activation: torch.nn.Tanh(),
+  }
+  - { layer_type: linear,
+      out_features: 2,
+      bias: True,
+      activation: torch.nn.Tanh(),
+  }
+
+

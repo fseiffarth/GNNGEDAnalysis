@@ -1,0 +1,56 @@
+datasets:
+  - {
+        name: "MUTAG_i-E_d-IsoN",
+        task: "graph_classification",
+        validation_folds: 10,
+        network_config_file: "Examples/GED/Configs/network_GATv2.yml",
+        type: "TUDataset"
+    }
+
+paths:
+  # all the paths are relative to the PYTHONPATH path, can be also defined dataset-wise in the network_config_file
+  data:
+    "Examples/Data/GEDGraphs/"
+  splits:
+    "Data/Splits/GIN/MUTAG_splits.json" # Path to the folder containing the data splits (if file is name_splits.json) otherwise path to the splits file (e.g. Examples/Data/Splits/MUTAG_test_x_splits.json)
+  results:
+    "Examples/GED/Results/" # Results will be saved in this folder
+
+device: cpu
+mode: experiments # if debug printing and plotting options are enabled, for the experiments mode should be 'experiments'
+precision: double
+
+# network options
+
+# optimizer: optimizer for the network
+optimizer:
+  - Adam
+
+# loss: loss function for the network
+loss:
+  - CrossEntropyLoss
+
+batch_size:
+  - 16
+learning_rate:
+  - 0.0001
+epochs:
+  - 1000
+
+early_stopping:
+  enabled:
+    False
+  patience:
+    50
+
+# how to sample the training data
+training_data_sampling: { type: 'undersampling' } # undersampling, oversampling, default
+#training_data_sampling: { type: 'default' } # undersampling, oversampling, default
+
+#input_features: {name: constant, value: 1.0, random_variation: { mean: 0.0, variance: 0.5 }}
+input_features: {name: node_labels, transformation: 'one_hot'}
+
+save_best_model: True
+#best_model: True
+
+

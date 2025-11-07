@@ -1,0 +1,59 @@
+paths:
+  # define a specific path for each architecture
+  results:
+    "Examples/GED/Results/GAT/" # Results will be saved in this folder
+
+networks:
+- - { layer_type: linear,
+      out_features: 64,
+      bias: True,
+      activation: torch.nn.ReLU(),
+    }
+  - { layer_type: gat_convolution,
+      bias: True,
+      out_channels: 64,
+      activation: torch.nn.ReLU(),
+      batch_norm: True,
+      heads: 4,
+}
+  - { layer_type: gat_convolution,
+      bias: True,
+      out_channels: 64,
+      activation: torch.nn.ReLU(),
+            batch_norm: True,
+            heads: 4,
+}
+  - { layer_type: gat_convolution,
+      bias: True,
+      out_channels: 64,
+      activation: torch.nn.ReLU(),
+            batch_norm: True,
+            heads: 4,
+  }
+  - { layer_type: gat_convolution,
+      bias: True,
+      out_channels: 64,
+      activation: torch.nn.ReLU(),
+      batch_norm: True,
+            heads: 4,
+  }
+  - { layer_type: gat_convolution,
+      bias: True,
+      out_channels: 64,
+      activation: torch.nn.ReLU(),
+      batch_norm: True,
+            heads: 4,
+  }
+  - { layer_type: global_pooling,
+        mode: mean,
+    }
+  - { layer_type: linear,
+      out_features: 64,
+      bias: True,
+      activation: torch.nn.ReLU(),
+  }
+  - { layer_type: linear,
+      out_features: 2,
+      bias: True,
+      activation: torch.nn.ReLU(),
+  }

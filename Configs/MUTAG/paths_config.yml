@@ -1,0 +1,15 @@
+datasets:
+  - {
+        # all the options are mandatory (paths should be relative to the PYTHONPATH path)
+        name: "MUTAG_i-E_d-IsoN", # dataset name
+        source: "path",  # dataset source type
+        task: "graph_classification", # task type
+        paths: {
+          data: "data/GEDGraphs/F2/", # path to the dataset (will be downloaded if not present)
+          results: "tmp/", # path to save the results
+          models: "Configs/MUTAG/models_GIN.yml", # path to the model configuration file
+          hyperparameters: "Configs/MUTAG/parameters.yml", # path to the hyperparameters configuration file
+          splits: "../SimpleGNN/repo/src/simplegnn/datasets/splits/standard/MUTAG_splits.json", # path to the data splits file (contains train/val/test splits)
+        }
+    }
+

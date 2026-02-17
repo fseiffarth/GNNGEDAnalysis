@@ -1,1 +1,0 @@
-# Define different split files for GED Path dataset to distinguish between original graphs path graphs etc.

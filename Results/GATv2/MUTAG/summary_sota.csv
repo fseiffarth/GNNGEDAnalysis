@@ -1,2 +1,0 @@
-ConfigurationId,RunId,Epoch,Epoch Accuracy Mean,Epoch Accuracy Std,Epoch Loss Mean,Epoch Loss Std,Validation Accuracy Mean,Validation Accuracy Std,Validation Loss Mean,Validation Loss Std
-0,0,404,89.5763531343973,2.5870631568082127,1.5927108467044635,0.41936828148744903,79.44444444444444,9.816561689406347,0.7491235788275793,0.46511258979176356

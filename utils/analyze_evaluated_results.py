@@ -2,6 +2,7 @@ import itertools
 import os
 from calendar import day_abbr
 
+import click
 import torch
 import pickle
 import time
@@ -815,20 +816,65 @@ class MainEvaluation():
 
 
 
-if __name__ == '__main__':
-    config_id = 0
-    # dataset
-    dbs = ['MUTAG', 'Mutagenicity', 'NCI1', 'DHFR', 'NCI109']
-    path_strategies = ['i-E_d-IsoN', 'Rnd']
-    gnn_algorithms = ['GIN', 'GATv2', 'GCN', 'GraphSAGE']
-    recalculate=False
+@click.command()
+@click.option("--config-id", default=0, type=int, show_default=True, help="Configuration ID to process.")
+@click.option(
+    "--db",
+    "dbs",
+    multiple=True,
+    default=("MUTAG",),
+    show_default=True,
+    help="Dataset to include. Repeat the option to pass multiple datasets.",
+)
+@click.option(
+    "--path-strategy",
+    "path_strategies",
+    multiple=True,
+    default=("i-E_d-IsoN", "Rnd"),
+    show_default=True,
+    help="Path strategy to include. Repeat the option to pass multiple strategies.",
+)
+@click.option(
+    "--gnn-algorithm",
+    "gnn_algorithms",
+    multiple=True,
+    default=("GIN", "GATv2", "GCN", "GraphSAGE"),
+    show_default=True,
+    help="GNN algorithm to include. Repeat the option to pass multiple algorithms.",
+)
+@click.option(
+    "--recalculate/--no-recalculate",
+    default=False,
+    show_default=True,
+    help="Whether to force recalculation while merging results.",
+)
+@click.option(
+    "--results-path",
+    default="results",
+    show_default=True,
+    help="Base directory containing evaluation results.",
+)
+@click.option(
+    "--evaluation-folder",
+    default="path_evaluation",
+    show_default=True,
+    help="Subfolder under each algorithm result directory with evaluation artifacts.",
+)
+def main(config_id, dbs, path_strategies, gnn_algorithms, recalculate, results_path, evaluation_folder):
+    dbs = list(dbs)
+    path_strategies = list(path_strategies)
+    gnn_algorithms = list(gnn_algorithms)
 
-    evaluation_folder = 'path_evaluation'
     tasks = list(itertools.product(dbs, path_strategies, gnn_algorithms))
     all_data = polars.DataFrame()
     for db, strategy, gnn_algorithm in tasks:
         print(f"Processing results for Dataset: {db}, Strategy: {strategy}, GNN: {gnn_algorithm}")
-        mainEvaluation = MainEvaluation(f'Examples/GED/Results/{gnn_algorithm}/Evaluation', strategy, db)
+        main_evaluation_path = f'{results_path}/{gnn_algorithm}/{evaluation_folder}'
+        # check if the path exists
+        if not os.path.exists(main_evaluation_path):
+            print(f"Path {main_evaluation_path} does not exist, skipping...")
+            continue
+        mainEvaluation = MainEvaluation(main_evaluation_path, strategy, db)
         flipping_statistics_all_folds = dict()
         for val_id in range(0, 10):
             mainEvaluation.merge_results(config_id, val_id, recalculate=recalculate)
@@ -845,7 +891,11 @@ if __name__ == '__main__':
             all_data = polars.concat([all_data, mainEvaluation.data])
         #mainEvaluation.create_statistics(config_id)
     # save all_data to csv
-    output_file = f'Examples/GED/Results/all_results.csv'
+    output_file = f'{results_path}/all_results.csv'
     all_data.write_csv(output_file)
     print(f"All results saved to {output_file}")
     pass
+
+
+if __name__ == '__main__':
+    main()

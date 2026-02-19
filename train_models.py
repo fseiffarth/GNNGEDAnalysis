@@ -3,6 +3,7 @@ import sys
 from pathlib import Path
 
 import click
+from simplegnn.framework.core import FrameworkMain
 
 
 def _import_framework_main():
@@ -24,10 +25,9 @@ def _import_framework_main():
 
 
 
-def train_ged(num_threads=-1):
-    FrameworkMain = _import_framework_main()
+def train_ged(num_threads=-1, db="MUTAG"):
     # Load and preprocess the experiment
-    experiment = FrameworkMain(Path("Configs/MUTAG/main_config.yml"))
+    experiment = FrameworkMain(Path(f"configs/{db}/main_config.yml"))
     experiment.preprocessing(num_threads=num_threads)
 
     # Run and evaluate all configurations defined in the config file
@@ -36,8 +36,14 @@ def train_ged(num_threads=-1):
 
 @click.command()
 @click.option('--num_threads', default=-1, help='Number of threads to use')
-def main(num_threads):
-    train_ged(num_threads)
+@click.option(
+    "--db",
+    default="MUTAG",
+    show_default=True,
+    help="Dataset/config folder under configs to train.",
+)
+def main(num_threads, db):
+    train_ged(num_threads=num_threads, db=db)
 
 
 

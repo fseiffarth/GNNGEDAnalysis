@@ -1,7 +1,33 @@
+import sys
 from pathlib import Path
 
+import click
 import polars
 import torch
+from simplegnn.framework.core import FrameworkMain, preprocess_graph_data
+from simplegnn.framework.model_configuration import ModelConfiguration
+from simplegnn.framework.run_configuration import get_run_configs
+from simplegnn.framework.utils.parameters import Parameters
+from simplegnn.framework.utils.preprocessing import load_splits, load_preprocessed_data_and_parameters
+
+
+def _import_framework_main():
+    try:
+        from simplegnn.framework.core import FrameworkMain
+        return FrameworkMain
+    except ImportError:
+        repo_root = Path(__file__).resolve().parent
+        simplegnn_src = repo_root.parent / "SimpleGNN" / "repo" / "src"
+        sys.path.append(str(simplegnn_src))
+        try:
+            from simplegnn.framework.core import FrameworkMain
+            return FrameworkMain
+        except ImportError as exc:
+            raise ImportError(
+                "Could not import FrameworkMain from simplegnn. "
+                f"Expected local source at '{simplegnn_src}' or an installed 'simplegnn' package."
+            ) from exc
+
 
 
 def table_accuracies(dbs, gnn_algos):
@@ -11,16 +37,16 @@ def table_accuracies(dbs, gnn_algos):
     for gnn_algorithm in gnn_algos:
         for db in dbs:
             # Load and preprocess the experiment
-            experiment_base = ExperimentMain(Path(f'Examples/GED/Configs/main_config_{db}.yml'))
-            experiment_base.ExperimentPreprocessing(num_threads=-1)
+            experiment_base = FrameworkMain(Path(f'configs/{db}/main_config.yml'))
+            experiment_base.preprocessing(num_threads=-1)
             # evaluate the pretrained model on the original data only for testing
             for db_id, config in enumerate(experiment_base.network_configurations[db]):
-                algorithm = config['network_config_file'].split('_')[1]
+                algorithm = str(config['paths']['models']).split('_')[1]
                 # also remove possible .yml at the end
                 algorithm = algorithm.replace('.yml', '')
                 if gnn_algorithm is not None and algorithm != gnn_algorithm:
                     continue
-                split_data = Load_Splits(config['paths']['splits'])
+                split_data = load_splits(config['paths']['splits'])
                 train_ids = split_data['train']
                 validation_ids = split_data['validation']
                 test_ids = split_data['test']
@@ -32,22 +58,21 @@ def table_accuracies(dbs, gnn_algos):
                 run_configs = get_run_configs(config)
                 for config_id, run_config in enumerate(run_configs):
                     validation_results = {}
-                    for val_id in range(config['validation_folds']):
+                    num_validation_folds = len(config['splits']['validation'])
+                    for val_id in range(num_validation_folds):
                         model = experiment_base.load_ordinary_model(db_name=db, validation_id=val_id, best=False, run_id=run_id, experiment_db_id=db_id)
                         model.eval()
                         para = Parameters()
                         load_preprocessed_data_and_parameters(config_id=config_id,
                                                               run_id=run_id,
                                                               validation_id=val_id,
-                                                              validation_folds=config.get('validation_folds', 10),
+                                                              validation_folds=num_validation_folds,
                                                               graph_data=graph_data, run_config=run_config, para=para)
                         seed = 42 + val_id + para.n_val_runs * run_id
                         configuration = ModelConfiguration(run_id, val_id, graph_data, (train_ids, validation_ids, test_ids),
                                                            seed, para)
                         # Initialize the graph neural network
-                        configuration.initialize_model(pretrained_network=model,
-                                                       use_model=configuration.para.run_config.config.get('use_model',
-                                                                                                          'ShareGNN'))
+                        configuration.initialize_model(pretrained_network=model)
                         print(f"Evaluating model for config_id {config_id}, val_id {val_id} on validation set")
                         validation_values, validation_outputs = configuration.evaluate_network(graph_ids=validation_ids[val_id], do_print=True, with_loss=True)
                         predictions = torch.argmax(validation_outputs, dim=1)
@@ -59,12 +84,13 @@ def table_accuracies(dbs, gnn_algos):
     for db in dbs:
         print(f"Results for dataset {db}:")
         print("GNN Algorithm\tMean Validation Accuracy (%)\tStd Validation Accuracy (%)")
+        num_validation_folds = len(config['splits']['validation'])
         for gnn_algorithm in gnn_algos:
             best_mean_accuracy = 0
             best_std_accuracy = 0
             for config_id in range(len(run_configs)):
                 if (db, gnn_algorithm, config_id) in results:
-                    accuracies = [results[(db, gnn_algorithm, config_id)][val_id] for val_id in range(config['validation_folds'])]
+                    accuracies = [results[(db, gnn_algorithm, config_id)][val_id] for val_id in range(num_validation_folds)]
                     mean_accuracy = sum(accuracies) / len(accuracies)
                     std_accuracy = (sum((x - mean_accuracy) ** 2 for x in accuracies) / len(accuracies)) ** 0.5
                     if mean_accuracy > best_mean_accuracy:
@@ -473,19 +499,48 @@ def algorithm_results(dbs, gnn_algos, data_path: Path):
     pass
 
 
-def main():
-    dbs = ['MUTAG', 'Mutagenicity', 'NCI1', 'DHFR', 'NCI109', ]
-    gnn_algos = ['GCN', 'GATv2', 'GraphSAGE', 'GIN']
-    data_path = Path('Examples/GED/Results/all_results.csv')
-    output_path = Path('Examples/GED/Results/Plots/')
+@click.command()
+@click.option(
+    "--db",
+    "dbs",
+    multiple=True,
+    default=("MUTAG", ),
+    show_default=True,
+    help="Dataset to include. Repeat the option to pass multiple datasets.",
+)
+@click.option(
+    "--gnn-algo",
+    "gnn_algos",
+    multiple=True,
+    default=("GCN", "GATv2", "GraphSAGE", "GIN"),
+    show_default=True,
+    help="GNN algorithm to include. Repeat the option to pass multiple algorithms.",
+)
+@click.option(
+    "--data-path",
+    type=click.Path(path_type=Path),
+    default=Path("results/all_results.csv"),
+    show_default=True,
+    help="Path to the consolidated results CSV file.",
+)
+@click.option(
+    "--output-path",
+    type=click.Path(path_type=Path),
+    default=Path("results/Plots/"),
+    show_default=True,
+    help="Directory where plots are written.",
+)
+def main(dbs, gnn_algos, data_path, output_path):
+    dbs = list(dbs)
+    gnn_algos = list(gnn_algos)
     if not data_path.exists():
         print("Results file not found. Please run the training script first to generate results.")
         return
 
-    #table_accuracies(dbs, gnn_algos)
-    #algorithm_results(dbs, gnn_algos, data_path)
-    #decision_flips_boxplots(dbs, gnn_algos, data_path=data_path, save_path=output_path)
-    #decision_class_changes_statistics(dbs, gnn_algos, data_path=data_path, save_path=output_path)
+    table_accuracies(dbs, gnn_algos)
+    algorithm_results(dbs, gnn_algos, data_path)
+    decision_flips_boxplots(dbs, gnn_algos, data_path=data_path, save_path=output_path)
+    decision_class_changes_statistics(dbs, gnn_algos, data_path=data_path, save_path=output_path)
     number_of_flips_statistics(dbs, gnn_algos, data_path=data_path, save_path=output_path)
 
 

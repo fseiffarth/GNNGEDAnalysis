@@ -251,10 +251,10 @@ def evaluate_single_task(num_threads=1, db="MUTAG", path_strategy="i-E_d-IsoN", 
     load_preprocessed_data_and_parameters = symbols["load_preprocessed_data_and_parameters"]
     ModelConfiguration = symbols["ModelConfiguration"]
 
-    experiment_base = FrameworkMain(Path(f"Configs/{db}/main_config.yml"))
+    experiment_base = FrameworkMain(Path(f"configs/{db}/main_config.yml"))
     experiment_base.preprocessing(num_threads=num_threads)
 
-    experiment_paths = FrameworkMain(Path(f"Configs/{db}/paths_config.yml"))
+    experiment_paths = FrameworkMain(Path(f"configs/{db}/paths_config.yml"))
     experiment_paths.preprocessing(num_threads=num_threads)
 
     run_id = 0
@@ -367,7 +367,7 @@ def evaluate_single_task(num_threads=1, db="MUTAG", path_strategy="i-E_d-IsoN", 
                 )
 
                 operation_info_file = (
-                    Path(experiment_paths.main_config["datasets"][db_id]["paths"]["data"])
+                    Path(experiment_paths.main_config["datasets"][0]["paths"]["data"])
                     .joinpath(f"{db}_{path_strategy}")
                     .joinpath(f"{db}_edit_paths_data.txt")
                 )
@@ -458,7 +458,7 @@ def run_evaluations(num_threads, dbs, path_strategies, gnn_algorithms, evaluatio
     "--path-strategy",
     "path_strategies",
     multiple=True,
-    default=("i-E_d-IsoN",),
+    default=("i-E_d-IsoN", "Rnd"),
     show_default=True,
     help="Path strategy to evaluate. Can be passed multiple times.",
 )
@@ -466,7 +466,7 @@ def run_evaluations(num_threads, dbs, path_strategies, gnn_algorithms, evaluatio
     "--gnn-algorithm",
     "gnn_algorithms",
     multiple=True,
-    default=("GIN",),
+default=("GIN", "GAT", "GATv2", "GraphSAGE", "GCN"),
     show_default=True,
     help="GNN algorithm filter. Can be passed multiple times.",
 )

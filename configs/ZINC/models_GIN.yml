@@ -1,0 +1,46 @@
+models: # define a list of architectures that will be used for the experiments
+- - { layer_type: linear,
+      out_features: 64,
+      bias: True,
+      activation: torch.nn.LeakyReLU(),
+    }
+  - { layer_type: gin_convolution,
+      bias: True,
+      out_channels: 64,
+      activation: torch.nn.LeakyReLU(),
+            batch_norm: True,
+            residual: False,
+            edge_dim: 4,
+      dropout: 0.2,
+}
+  - { layer_type: gin_convolution,
+      bias: True,
+      out_channels: 64,
+      activation: torch.nn.LeakyReLU(),
+            batch_norm: True,
+            residual: False,
+            edge_dim: 4,
+      dropout: 0.2,
+}
+  - { layer_type: global_pooling,
+        mode: mean,
+    }
+  - { layer_type: batch_norm,
+  }
+  - { layer_type: dropout,
+      p: 0.2,
+  }
+  - { layer_type: linear,
+        out_features: 64,
+      bias: True,
+      activation: torch.nn.LeakyReLU(),
+  }
+  - { layer_type: linear,
+      out_features: 32,
+      bias: True,
+      activation: torch.nn.LeakyReLU(),
+  }
+  - { layer_type: linear,
+      out_features: 1,
+      bias: True,
+  }

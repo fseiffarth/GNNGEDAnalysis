@@ -1,0 +1,77 @@
+# main configuration file for running graph regression experiments with classical GNNs on the ZINC dataset.
+datasets:
+  - {
+        # all the options are mandatory (paths should be relative to the PYTHONPATH path)
+        name: "ZINC", # dataset name
+        source: "ZINC",  # dataset source type
+        task: "graph_regression", # task type
+        paths: {
+          data: "data/ZINC/", # path to the dataset (will be downloaded if not present)
+          labels: "data/ZINC/labels/", # path to the labels
+          properties: "data/ZINC/properties/", # path to the precomputed properties
+          results: "results/GIN/", # path to save the results
+          models: "configs/ZINC/models_GIN.yml", # path to the model configuration file
+          hyperparameters: "configs/ZINC/parameters.yml", # path to the hyperparameters configuration file
+          splits: "../SimpleGNN/repo/src/simplegnn/datasets/splits/fixed/ZINC_splits.json", # path to the data splits file (contains train/val/test splits)
+        }
+    }
+  - {
+        # all the options are mandatory (paths should be relative to the PYTHONPATH path)
+        name: "ZINC", # dataset name
+        source: "ZINC",  # dataset source type
+        task: "graph_regression", # task type
+        paths: {
+          data: "data/ZINC/", # path to the dataset (will be downloaded if not present)
+          labels: "data/ZINC/labels/", # path to the labels
+          properties: "data/ZINC/properties/", # path to the precomputed properties
+          results: "results/GCN/", # path to save the results
+          models: "configs/ZINC/models_GCN.yml", # path to the model configuration file
+          hyperparameters: "configs/ZINC/parameters.yml", # path to the hyperparameters configuration file
+          splits: "../SimpleGNN/repo/src/simplegnn/datasets/splits/fixed/ZINC_splits.json", # path to the data splits file (contains train/val/test splits)
+        }
+    }
+  - {
+    # all the options are mandatory (paths should be relative to the PYTHONPATH path)
+    name: "ZINC", # dataset name
+    source: "ZINC",  # dataset source type
+    task: "graph_regression", # task type
+    paths: {
+      data: "data/ZINC/", # path to the dataset (will be downloaded if not present)
+      labels: "data/ZINC/labels/", # path to the labels
+      properties: "data/ZINC/properties/", # path to the precomputed properties
+      results: "results/GAT/", # path to save the results
+      models: "configs/ZINC/models_GAT.yml", # path to the model configuration file
+      hyperparameters: "configs/ZINC/parameters.yml", # path to the hyperparameters configuration file
+      splits: "../SimpleGNN/repo/src/simplegnn/datasets/splits/fixed/ZINC_splits.json", # path to the data splits file (contains train/val/test splits)
+    }
+  }
+  - {
+    # all the options are mandatory (paths should be relative to the PYTHONPATH path)
+    name: "ZINC", # dataset name
+    source: "ZINC",  # dataset source type
+    task: "graph_regression", # task type
+    paths: {
+      data: "data/ZINC/", # path to the dataset (will be downloaded if not present)
+      labels: "data/ZINC/labels/", # path to the labels
+      properties: "data/ZINC/properties/", # path to the precomputed properties
+      results: "results/GATv2/", # path to save the results
+      models: "configs/ZINC/models_GATv2.yml", # path to the model configuration file
+      hyperparameters: "configs/ZINC/parameters.yml", # path to the hyperparameters configuration file
+      splits: "../SimpleGNN/repo/src/simplegnn/datasets/splits/fixed/ZINC_splits.json", # path to the data splits file (contains train/val/test splits)
+    }
+  }
+  - {
+    # all the options are mandatory (paths should be relative to the PYTHONPATH path)
+    name: "ZINC", # dataset name
+    source: "ZINC",  # dataset source type
+    task: "graph_regression", # task type
+    paths: {
+      data: "data/ZINC/", # path to the dataset (will be downloaded if not present)
+      labels: "data/ZINC/labels/", # path to the labels
+      properties: "data/ZINC/properties/", # path to the precomputed properties
+      results: "results/GraphSAGE/", # path to save the results
+      models: "configs/ZINC/models_GraphSAGE.yml", # path to the model configuration file
+      hyperparameters: "configs/ZINC/parameters.yml", # path to the hyperparameters configuration file
+      splits: "../SimpleGNN/repo/src/simplegnn/datasets/splits/fixed/ZINC_splits.json", # path to the data splits file (contains train/val/test splits)
+    }
+  }

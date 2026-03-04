@@ -1,0 +1,35 @@
+device: cpu
+mode: experiments # if debug printing and plotting options are enabled, for the experiments mode should be 'experiments'
+precision: double
+
+# network options
+
+# optimizer: optimizer for the network
+optimizer:
+  - Adam
+
+# loss: loss function for the network
+loss:
+  - MAE
+
+batch_size:
+  - 128
+learning_rate:
+  - 0.001
+epochs:
+  - 150
+
+early_stopping:
+  enabled:
+    False
+  patience:
+    25
+
+scheduler: { type: 'ReduceLROnPlateau', factor: 0.5, patience: 5, min_lr: 0.0001 }
+
+# how to sample the training data
+training_data_sampling: { type: 'default' }
+
+input_features: {name: node_labels, transformation: 'one_hot'}
+
+save_best_model: True

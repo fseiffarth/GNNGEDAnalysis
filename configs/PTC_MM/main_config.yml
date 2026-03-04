@@ -1,0 +1,68 @@
+# main configuration file for running a basic graph classification experiment using the GIN and GCN models on the MUTAG dataset from the TUDataset collection.
+datasets:
+  - {
+        # all the options are mandatory (paths should be relative to the PYTHONPATH path)
+        name: "PTC_MM", # dataset name
+        source: "TUDataset",  # dataset source type
+        task: "graph_classification", # task type
+        paths: {
+          data: "data/TUDatasets/", # path to the dataset (will be downloaded if not present)
+          results: "results/GIN/", # path to save the results
+          models: "configs/PTC_MM/models_GIN.yml", # path to the model configuration file
+          hyperparameters: "configs/PTC_MM/parameters.yml", # path to the hyperparameters configuration file
+          splits: "../SimpleGNN/repo/src/simplegnn/datasets/splits/tu_splits/PTC_MM_splits.json", # path to the data splits file (contains train/val/test splits)
+        }
+    }
+  - {
+        # all the options are mandatory (paths should be relative to the PYTHONPATH path)
+        name: "PTC_MM", # dataset name
+        source: "TUDataset",  # dataset source type
+        task: "graph_classification", # task type
+        paths: {
+          data: "data/TUDatasets/", # path to the dataset (will be downloaded if not present)
+          results: "results/GCN/", # path to save the results
+          models: "configs/PTC_MM/models_GCN.yml", # path to the model configuration file
+          hyperparameters: "configs/PTC_MM/parameters.yml", # path to the hyperparameters configuration file
+          splits: "../SimpleGNN/repo/src/simplegnn/datasets/splits/tu_splits/PTC_MM_splits.json", # path to the data splits file (contains train/val/test splits)
+        }
+    }
+  - {
+    # all the options are mandatory (paths should be relative to the PYTHONPATH path)
+    name: "PTC_MM", # dataset name
+    source: "TUDataset",  # dataset source type
+    task: "graph_classification", # task type
+    paths: {
+      data: "data/TUDatasets/", # path to the dataset (will be downloaded if not present)
+      results: "results/GAT/", # path to save the results
+      models: "configs/PTC_MM/models_GAT.yml", # path to the model configuration file
+      hyperparameters: "configs/PTC_MM/parameters.yml", # path to the hyperparameters configuration file
+      splits: "../SimpleGNN/repo/src/simplegnn/datasets/splits/tu_splits/PTC_MM_splits.json", # path to the data splits file (contains train/val/test splits)
+    }
+  }
+  - {
+    # all the options are mandatory (paths should be relative to the PYTHONPATH path)
+    name: "PTC_MM", # dataset name
+    source: "TUDataset",  # dataset source type
+    task: "graph_classification", # task type
+    paths: {
+      data: "data/TUDatasets/", # path to the dataset (will be downloaded if not present)
+      results: "results/GATv2/", # path to save the results
+      models: "configs/PTC_MM/models_GATv2.yml", # path to the model configuration file
+      hyperparameters: "configs/PTC_MM/parameters.yml", # path to the hyperparameters configuration file
+      splits: "../SimpleGNN/repo/src/simplegnn/datasets/splits/tu_splits/PTC_MM_splits.json", # path to the data splits file (contains train/val/test splits)
+    }
+  }
+  - {
+    # all the options are mandatory (paths should be relative to the PYTHONPATH path)
+    name: "PTC_MM", # dataset name
+    source: "TUDataset",  # dataset source type
+    task: "graph_classification", # task type
+    paths: {
+      data: "data/TUDatasets/", # path to the dataset (will be downloaded if not present)
+      results: "results/GraphSAGE/", # path to save the results
+      models: "configs/PTC_MM/models_GraphSAGE.yml", # path to the model configuration file
+      hyperparameters: "configs/PTC_MM/parameters.yml", # path to the hyperparameters configuration file
+      splits: "../SimpleGNN/repo/src/simplegnn/datasets/splits/tu_splits/PTC_MM_splits.json", # path to the data splits file (contains train/val/test splits)
+    }
+  }
+

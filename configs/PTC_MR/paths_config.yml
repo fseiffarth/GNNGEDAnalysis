@@ -1,0 +1,27 @@
+datasets:
+  - {
+        # all the options are mandatory (paths should be relative to the PYTHONPATH path)
+        name: "PTC_MR_i-E_d-IsoN", # dataset name
+        source: "path",  # dataset source type
+        task: "graph_classification", # task type
+        paths: {
+          data: "data/GEDGraphs/F2/", # path to the dataset (will be downloaded if not present)
+          results: "tmp/", # path to save the results
+          models: "configs/PTC_MR/models_GIN.yml", # path to the model configuration file
+          hyperparameters: "configs/PTC_MR/parameters.yml", # path to the hyperparameters configuration file
+          splits: "../SimpleGNN/repo/src/simplegnn/datasets/splits/tu_splits/PTC_MR_splits.json", # path to the data splits file (contains train/val/test splits)
+        }
+    }
+  - {
+    # all the options are mandatory (paths should be relative to the PYTHONPATH path)
+    name: "PTC_MR_Rnd", # dataset name
+    source: "path",  # dataset source type
+    task: "graph_classification", # task type
+    paths: {
+      data: "data/GEDGraphs/F2/", # path to the dataset (will be downloaded if not present)
+      results: "tmp/", # path to save the results
+      models: "configs/PTC_MR/models_GIN.yml", # path to the model configuration file
+      hyperparameters: "configs/PTC_MR/parameters.yml", # path to the hyperparameters configuration file
+      splits: "../SimpleGNN/repo/src/simplegnn/datasets/splits/tu_splits/PTC_MR_splits.json", # path to the data splits file (contains train/val/test splits)
+    }
+  }

@@ -10,7 +10,7 @@ datasets:
           results: "results/GIN/", # path to save the results
           models: "configs/MUTAG/models_GIN.yml", # path to the model configuration file
           hyperparameters: "configs/MUTAG/parameters.yml", # path to the hyperparameters configuration file
-          splits: "../SimpleGNN/repo/src/simplegnn/datasets/splits/standard/MUTAG_splits.json", # path to the data splits file (contains train/val/test splits)
+          splits: "../SimpleGNN/repo/src/simplegnn/datasets/splits/tu_splits/MUTAG_splits.json", # path to the data splits file (contains train/val/test splits)
         }
     }
   - {
@@ -23,7 +23,7 @@ datasets:
           results: "results/GCN/", # path to save the results
           models: "configs/MUTAG/models_GCN.yml", # path to the model configuration file
           hyperparameters: "configs/MUTAG/parameters.yml", # path to the hyperparameters configuration file
-          splits: "../SimpleGNN/repo/src/simplegnn/datasets/splits/standard/MUTAG_splits.json", # path to the data splits file (contains train/val/test splits)
+          splits: "../SimpleGNN/repo/src/simplegnn/datasets/splits/tu_splits/MUTAG_splits.json", # path to the data splits file (contains train/val/test splits)
         }
     }
   - {
@@ -36,7 +36,7 @@ datasets:
       results: "results/GAT/", # path to save the results
       models: "configs/MUTAG/models_GAT.yml", # path to the model configuration file
       hyperparameters: "configs/MUTAG/parameters.yml", # path to the hyperparameters configuration file
-      splits: "../SimpleGNN/repo/src/simplegnn/datasets/splits/standard/MUTAG_splits.json", # path to the data splits file (contains train/val/test splits)
+      splits: "../SimpleGNN/repo/src/simplegnn/datasets/splits/tu_splits/MUTAG_splits.json", # path to the data splits file (contains train/val/test splits)
     }
   }
   - {
@@ -49,7 +49,7 @@ datasets:
       results: "results/GATv2/", # path to save the results
       models: "configs/MUTAG/models_GATv2.yml", # path to the model configuration file
       hyperparameters: "configs/MUTAG/parameters.yml", # path to the hyperparameters configuration file
-      splits: "../SimpleGNN/repo/src/simplegnn/datasets/splits/standard/MUTAG_splits.json", # path to the data splits file (contains train/val/test splits)
+      splits: "../SimpleGNN/repo/src/simplegnn/datasets/splits/tu_splits/MUTAG_splits.json", # path to the data splits file (contains train/val/test splits)
     }
   }
   - {
@@ -62,7 +62,7 @@ datasets:
       results: "results/GraphSAGE/", # path to save the results
       models: "configs/MUTAG/models_GraphSAGE.yml", # path to the model configuration file
       hyperparameters: "configs/MUTAG/parameters.yml", # path to the hyperparameters configuration file
-      splits: "../SimpleGNN/repo/src/simplegnn/datasets/splits/standard/MUTAG_splits.json", # path to the data splits file (contains train/val/test splits)
+      splits: "../SimpleGNN/repo/src/simplegnn/datasets/splits/tu_splits/MUTAG_splits.json", # path to the data splits file (contains train/val/test splits)
     }
   }
 

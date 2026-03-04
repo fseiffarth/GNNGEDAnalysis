@@ -3,6 +3,10 @@ import sys
 from pathlib import Path
 
 import click
+try:
+    from click.core import ParameterSource
+except ImportError:  # pragma: no cover - compatibility fallback for older Click
+    ParameterSource = None
 
 CONFIGS_ROOT = Path(__file__).resolve().parent / "configs"
 
@@ -73,6 +77,12 @@ AVAILABLE_DBS_HELP = ", ".join(AVAILABLE_DBS) if AVAILABLE_DBS else "<none found
 @click.command()
 @click.option("--num_threads", default=-1, help="Number of threads to use")
 @click.option(
+    "--all",
+    "train_all",
+    is_flag=True,
+    help="Train all datasets discovered under configs/*/main_config.yml.",
+)
+@click.option(
     "--db",
     "dbs",
     multiple=True,
@@ -83,8 +93,30 @@ AVAILABLE_DBS_HELP = ", ".join(AVAILABLE_DBS) if AVAILABLE_DBS else "<none found
         f"Available options from configs: {AVAILABLE_DBS_HELP}"
     ),
 )
-def main(num_threads, dbs):
-    train_ged(num_threads=num_threads, dbs=list(dbs))
+@click.pass_context
+def main(ctx, num_threads, train_all, dbs):
+    if hasattr(ctx, "get_parameter_source") and ParameterSource is not None:
+        parameter_source = ctx.get_parameter_source("dbs")
+        dbs_given_explicitly = parameter_source != ParameterSource.DEFAULT
+    else:
+        dbs_given_explicitly = any(
+            arg == "--db" or arg.startswith("--db=") for arg in sys.argv[1:]
+        )
+
+    if train_all and dbs_given_explicitly:
+        raise click.ClickException("Options '--all' and '--db' are mutually exclusive.")
+
+    if train_all:
+        selected_dbs = _list_available_dbs(CONFIGS_ROOT)
+        if not selected_dbs:
+            raise click.ClickException(
+                "No dataset configs found for '--all'. "
+                "Expected at least one 'configs/<db>/main_config.yml'."
+            )
+    else:
+        selected_dbs = list(dbs)
+
+    train_ged(num_threads=num_threads, dbs=selected_dbs)
 
 
 if __name__ == "__main__":

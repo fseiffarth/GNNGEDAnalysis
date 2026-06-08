@@ -822,7 +822,7 @@ class MainEvaluation():
     "--db",
     "dbs",
     multiple=True,
-    default=("MUTAG",),
+    default=("MUTAG", "PTC_FM", "PTC_FR", "PTC_MM", "PTC_MR"),
     show_default=True,
     help="Dataset to include. Repeat the option to pass multiple datasets.",
 )
@@ -830,7 +830,7 @@ class MainEvaluation():
     "--path-strategy",
     "path_strategies",
     multiple=True,
-    default=("i-E_d-IsoN", "Rnd"),
+    default=("d-E_d-IsoN", "i-E_d-IsoN", "Rnd"),
     show_default=True,
     help="Path strategy to include. Repeat the option to pass multiple strategies.",
 )

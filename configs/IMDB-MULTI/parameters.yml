@@ -29,8 +29,8 @@ early_stopping:
 #training_data_sampling: { type: 'undersampling' } # undersampling, oversampling, default
 training_data_sampling: { type: 'default' } # undersampling, oversampling, default
 
-#input_features: {name: constant, value: 1.0, random_variation: { mean: 0.0, variance: 0.5 }}
-input_features: {name: node_labels, transformation: 'one_hot'}
+input_features: {name: constant, value: 1.0}
+#input_features: {name: node_labels, transformation: 'one_hot'}
 
 save_best_model: True
 #best_model: True

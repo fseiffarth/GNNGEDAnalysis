@@ -17,7 +17,7 @@ batch_size:
 learning_rate:
   - 0.001
 epochs:
-  - 150
+  - 500
 
 early_stopping:
   enabled:

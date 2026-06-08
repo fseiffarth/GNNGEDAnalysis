@@ -6,10 +6,27 @@ import click
 import joblib
 import torch
 
+try:
+    from click.core import ParameterSource
+except ImportError:  # pragma: no cover - compatibility fallback for older Click
+    ParameterSource = None
+
 from copy_ged_graphs import copy_ged_graphs
 
 
 _SIMPLEGNN_SYMBOLS = None
+CONFIGS_ROOT = Path(__file__).resolve().parent / "configs"
+CLASSICAL_PAPER_DBS = (
+    "DHFR",
+    "MUTAG",
+    "Mutagenicity",
+    "NCI1",
+    "NCI109",
+    "PTC_FM",
+    "PTC_FR",
+    "PTC_MM",
+    "PTC_MR",
+)
 
 
 def _load_simplegnn_symbols():
@@ -58,6 +75,35 @@ def _load_simplegnn_symbols():
         "preprocess_graph_data": preprocess_graph_data,
     }
     return _SIMPLEGNN_SYMBOLS
+
+
+def _list_available_dbs(configs_root=CONFIGS_ROOT):
+    if not configs_root.exists():
+        return []
+
+    return sorted(
+        entry.name
+        for entry in configs_root.iterdir()
+        if entry.is_dir() and entry.joinpath("main_config.yml").is_file()
+    )
+
+
+def _validate_requested_dbs(dbs, configs_root=CONFIGS_ROOT):
+    available_dbs = _list_available_dbs(configs_root)
+    requested_dbs = list(dbs)
+
+    missing_dbs = [
+        db
+        for db in requested_dbs
+        if not configs_root.joinpath(db, "main_config.yml").is_file()
+    ]
+    if missing_dbs:
+        available_text = ", ".join(available_dbs) if available_dbs else "<none>"
+        missing_text = ", ".join(missing_dbs)
+        raise click.ClickException(
+            f"Missing config(s) for db: {missing_text}. "
+            f"Expected 'configs/<db>/main_config.yml'. Available db options: {available_text}"
+        )
 
 
 def ensure_evaluation_dir(results_path, evaluation_folder):
@@ -260,7 +306,7 @@ def evaluate_single_task(num_threads=1, db="MUTAG", path_strategy="i-E_d-IsoN", 
     run_id = 0
 
     for db_id, config in enumerate(experiment_base.network_configurations[db]):
-        algorithm = str(config["paths"]["models"]).split("_")[1].replace(".yml", "")
+        algorithm = str(config["paths"]["models"]).split("_")[-1].replace(".yml", "")
         if gnn_algorithm is not None and algorithm != gnn_algorithm:
             continue
 
@@ -414,7 +460,7 @@ def run_evaluations(num_threads, dbs, path_strategies, gnn_algorithms, evaluatio
         raise ValueError("No evaluation tasks selected. Provide at least one db, path strategy, and algorithm.")
 
     torch.set_num_threads(1)
-    joblib.Parallel(n_jobs=len(tasks))(
+    joblib.Parallel(n_jobs=min(num_threads, len(tasks)))(
         joblib.delayed(evaluate_single_task)(
             num_threads=num_threads,
             db=db,
@@ -426,8 +472,12 @@ def run_evaluations(num_threads, dbs, path_strategies, gnn_algorithms, evaluatio
     )
 
 
+AVAILABLE_DBS = _list_available_dbs()
+AVAILABLE_DBS_HELP = ", ".join(AVAILABLE_DBS) if AVAILABLE_DBS else "<none found>"
+
+
 @click.command()
-@click.option("--num_threads", default=1, help="Number of threads to use")
+@click.option("--num_threads", default=-1, help="Number of threads to use")
 @click.option(
     "--copy-source-root",
     default="../GNNGED/Results",
@@ -447,18 +497,31 @@ def run_evaluations(num_threads, dbs, path_strategies, gnn_algorithms, evaluatio
     help="Skip datasets already present at destination when copying GED graphs",
 )
 @click.option(
+    "--all_dbs",
+    is_flag=True,
+    help="Evaluate all datasets discovered under configs/*/main_config.yml.",
+)
+@click.option(
+    "--all_dbs_classical",
+    is_flag=True,
+    help="Evaluate the nine classical paper datasets.",
+)
+@click.option(
     "--db",
     "dbs",
     multiple=True,
     default=("MUTAG",),
     show_default=True,
-    help="Dataset to evaluate. Can be passed multiple times.",
+    help=(
+        "Dataset/config folder under configs to evaluate. Repeat --db to evaluate "
+        f"multiple datasets. Available options from configs: {AVAILABLE_DBS_HELP}"
+    ),
 )
 @click.option(
     "--path-strategy",
     "path_strategies",
     multiple=True,
-    default=("i-E_d-IsoN", "Rnd"),
+    default=("d-E_d-IsoN",),
     show_default=True,
     help="Path strategy to evaluate. Can be passed multiple times.",
 )
@@ -466,7 +529,7 @@ def run_evaluations(num_threads, dbs, path_strategies, gnn_algorithms, evaluatio
     "--gnn-algorithm",
     "gnn_algorithms",
     multiple=True,
-default=("GIN", "GAT", "GATv2", "GraphSAGE", "GCN"),
+    default=("GIN", "GAT", "GATv2", "GraphSAGE", "GCN"),
     show_default=True,
     help="GNN algorithm filter. Can be passed multiple times.",
 )
@@ -476,16 +539,57 @@ default=("GIN", "GAT", "GATv2", "GraphSAGE", "GCN"),
     show_default=True,
     help="Subfolder name under results path used to store evaluation outputs.",
 )
+@click.pass_context
 def main(
+    ctx,
     num_threads,
     copy_source_root,
     copy_dest_root,
     copy_skip_existing,
+    all_dbs,
+    all_dbs_classical,
     dbs,
     path_strategies,
     gnn_algorithms,
     evaluation_folder,
 ):
+    if hasattr(ctx, "get_parameter_source") and ParameterSource is not None:
+        parameter_source = ctx.get_parameter_source("dbs")
+        dbs_given_explicitly = parameter_source != ParameterSource.DEFAULT
+    else:
+        dbs_given_explicitly = any(
+            arg == "--db" or arg.startswith("--db=") for arg in sys.argv[1:]
+        )
+
+    if all_dbs and all_dbs_classical:
+        raise click.ClickException(
+            "Options '--all_dbs' and '--all_dbs_classical' are mutually exclusive."
+        )
+
+    if all_dbs_classical and dbs_given_explicitly:
+        raise click.ClickException(
+            "Options '--all_dbs_classical' and '--db' are mutually exclusive."
+        )
+
+    if all_dbs and dbs_given_explicitly:
+        raise click.ClickException(
+            "Options '--all_dbs' and '--db' are mutually exclusive."
+        )
+
+    if all_dbs:
+        selected_dbs = _list_available_dbs(CONFIGS_ROOT)
+        if not selected_dbs:
+            raise click.ClickException(
+                "No dataset configs found for '--all_dbs'. "
+                "Expected at least one 'configs/<db>/main_config.yml'."
+            )
+    elif all_dbs_classical:
+        selected_dbs = list(CLASSICAL_PAPER_DBS)
+        _validate_requested_dbs(selected_dbs, CONFIGS_ROOT)
+    else:
+        selected_dbs = list(dbs)
+        _validate_requested_dbs(selected_dbs, CONFIGS_ROOT)
+
     copy_result = copy_ged_graphs(
         source_root=copy_source_root,
         dest_root=copy_dest_root,
@@ -503,7 +607,7 @@ def main(
 
     run_evaluations(
         num_threads=num_threads,
-        dbs=list(dbs),
+        dbs=selected_dbs,
         path_strategies=list(path_strategies),
         gnn_algorithms=list(gnn_algorithms),
         evaluation_folder=evaluation_folder,

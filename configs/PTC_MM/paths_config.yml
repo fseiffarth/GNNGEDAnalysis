@@ -6,7 +6,7 @@ datasets:
         task: "graph_classification", # task type
         paths: {
           data: "data/GEDGraphs/F2/", # path to the dataset (will be downloaded if not present)
-          results: "tmp/", # path to save the results
+          results: "results/GIN/", # path to save the results
           models: "configs/PTC_MM/models_GIN.yml", # path to the model configuration file
           hyperparameters: "configs/PTC_MM/parameters.yml", # path to the hyperparameters configuration file
           splits: "../SimpleGNN/repo/src/simplegnn/datasets/splits/tu_splits/PTC_MM_splits.json", # path to the data splits file (contains train/val/test splits)
@@ -19,7 +19,7 @@ datasets:
     task: "graph_classification", # task type
     paths: {
       data: "data/GEDGraphs/F2/", # path to the dataset (will be downloaded if not present)
-      results: "tmp/", # path to save the results
+      results: "results/GIN/", # path to save the results
       models: "configs/PTC_MM/models_GIN.yml", # path to the model configuration file
       hyperparameters: "configs/PTC_MM/parameters.yml", # path to the hyperparameters configuration file
       splits: "../SimpleGNN/repo/src/simplegnn/datasets/splits/tu_splits/PTC_MM_splits.json", # path to the data splits file (contains train/val/test splits)

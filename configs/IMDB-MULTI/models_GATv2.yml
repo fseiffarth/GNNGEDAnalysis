@@ -41,6 +41,6 @@ models:
         activation: torch.nn.LeakyReLU(),
     }
     - { layer_type: linear,
-        out_features: 2,
+        out_features: 3,
         bias: True,
     }

@@ -43,6 +43,7 @@ REQUIRED_COLUMNS = [
 ALL_EXPERIMENTS = (
     "flips_per_operation",
     "flips_per_operation_relative",
+    "flips_per_operation_relative_combined",
     "flips_statistics",
     "class_change_heatmaps",
     "class_change_heatmaps_flipping_only",
@@ -96,6 +97,12 @@ def _slugify(parts: Iterable[str]) -> str:
                 out.append("_")
         clean.append("".join(out))
     return "__".join(clean)
+
+
+def _display_gnn_label(gnn: str) -> str:
+    if gnn == "GraphSAGE":
+        return "GSAGE"
+    return gnn
 
 
 class RunningStats:
@@ -269,7 +276,11 @@ class ExperimentRunner:
             split_names.append("validation")
         num_decision_changes = sum(int(item["is_flipping"]) for item in rows)
 
-        if "flips_per_operation" in self.experiments or "flips_per_operation_relative" in self.experiments:
+        if (
+            "flips_per_operation" in self.experiments
+            or "flips_per_operation_relative" in self.experiments
+            or "flips_per_operation_relative_combined" in self.experiments
+        ):
             for split_name in split_names:
                 self.flips_per_operation_present.add((dataset, gnn, strategy, val_id, split_name))
 
@@ -395,6 +406,8 @@ class ExperimentRunner:
             self._write_flips_per_operation_outputs()
         if "flips_per_operation_relative" in self.experiments:
             self._write_flips_per_operation_relative_outputs()
+        if "flips_per_operation_relative_combined" in self.experiments:
+            self._write_flips_per_operation_relative_combined_outputs()
         if "flips_statistics" in self.experiments:
             self._write_flips_statistics_outputs()
         if "class_change_heatmaps" in self.experiments:
@@ -669,6 +682,156 @@ class ExperimentRunner:
                     figure.savefig(out_png, dpi=150)
                     plt.close(figure)
 
+    def _write_flips_per_operation_relative_combined_outputs(self) -> None:
+        base_dir = self.output_dir / "experiments_flips_per_operation_relative_combined"
+        base_dir.mkdir(parents=True, exist_ok=True)
+        preferred_gnn_order = ["GCN", "GATv2", "GraphSAGE", "GIN"]
+
+        def _sort_val_ids(values: Iterable[str]) -> List[str]:
+            return sorted(values, key=lambda item: _to_int(item, default=0))
+
+        def _order_gnns(gnns: Iterable[str]) -> List[str]:
+            gnn_list = list(gnns)
+            known = [gnn for gnn in preferred_gnn_order if gnn in gnn_list]
+            extras = sorted(gnn for gnn in gnn_list if gnn not in preferred_gnn_order)
+            return known + extras
+
+        selected_vals = _sort_val_ids(self.selected_vals)
+        present_groups = {
+            (dataset, strategy, split_name)
+            for dataset, _, strategy, _, split_name in self.flips_per_operation_present
+        }
+
+        grouped_values: Dict[Tuple[str, str, str], Dict[Tuple[str, str], List[float]]] = defaultdict(
+            lambda: defaultdict(list)
+        )
+        y_limits_by_dataset_split: Dict[Tuple[str, str], Tuple[float, float]] = {}
+
+        for dataset, strategy, split_name in sorted(present_groups):
+            for gnn in _order_gnns(self.selected_gnns):
+                for val_id in selected_vals:
+                    if (dataset, gnn, strategy, val_id, split_name) not in self.flips_per_operation_present:
+                        continue
+                    for operation_name in FLIPS_PER_OPERATION_NAMES:
+                        decision_changes = self.flips_per_operation_counts.get(
+                            (dataset, gnn, strategy, val_id, split_name, operation_name), 0
+                        )
+                        operation_count = self.flips_per_operation_total_counts.get(
+                            (dataset, gnn, strategy, val_id, split_name, operation_name), 0
+                        )
+                        relative_count = (decision_changes / operation_count) if operation_count > 0 else 0.0
+                        grouped_values[(dataset, strategy, split_name)][(gnn, operation_name)].append(relative_count)
+
+        for dataset, split_name in sorted({(dataset, split_name) for dataset, _, split_name in present_groups}):
+            values = []
+            for strategy in self.selected_strategies:
+                key = (dataset, strategy, split_name)
+                if key not in grouped_values:
+                    continue
+                for gnn, operation_name in grouped_values[key]:
+                    values.extend(grouped_values[key][(gnn, operation_name)])
+            if not values:
+                y_limits_by_dataset_split[(dataset, split_name)] = (0.0, 1.0)
+                continue
+            ymin = min(values)
+            ymax = max(values)
+            if math.isclose(ymin, ymax):
+                if math.isclose(ymax, 0.0):
+                    ymax = 1.0
+                else:
+                    ymin = min(0.0, ymin)
+            y_limits_by_dataset_split[(dataset, split_name)] = (ymin, ymax)
+
+        try:
+            import matplotlib
+
+            matplotlib.use("Agg")
+            import matplotlib.pyplot as plt
+        except ImportError:
+            return
+
+        for key in sorted(grouped_values):
+            dataset, strategy, split_name = key
+            gnns_for_group = _order_gnns(
+                {
+                    gnn
+                    for gnn in self.selected_gnns
+                    if any(
+                        (dataset, gnn, strategy, val_id, split_name) in self.flips_per_operation_present
+                        for val_id in selected_vals
+                    )
+                }
+            )
+            if not gnns_for_group:
+                continue
+
+            include_operations = list(FLIPS_PER_OPERATION_NAMES)
+            edge_relabel_name = "EDGE RELABEL"
+            edge_relabel_total = sum(
+                sum(grouped_values[key].get((gnn, edge_relabel_name), [])) for gnn in gnns_for_group
+            )
+            if edge_relabel_total == 0.0:
+                include_operations = [name for name in include_operations if name != edge_relabel_name]
+
+            if not include_operations:
+                continue
+
+            figure = plt.figure()
+            ax = figure.add_subplot(111)
+            data_groups = []
+            positions = []
+            gap = 1
+            width = 0.6
+            num_gnns = len(gnns_for_group)
+            for operation_idx, operation_name in enumerate(include_operations):
+                for gnn_idx, gnn in enumerate(gnns_for_group):
+                    values = grouped_values[key].get((gnn, operation_name), [])
+                    data_groups.append(values or [0.0])
+                    positions.append(operation_idx * (num_gnns + gap) + gnn_idx)
+
+            color_cycle = plt.rcParams["axes.prop_cycle"].by_key().get("color", ["C0", "C1", "C2", "C3"])
+            algorithm_colors = {
+                "GCN": color_cycle[0 % len(color_cycle)],
+                "GATv2": color_cycle[1 % len(color_cycle)],
+                "GraphSAGE": color_cycle[2 % len(color_cycle)],
+                "GIN": color_cycle[3 % len(color_cycle)],
+            }
+            fallback_colors = {
+                gnn: color_cycle[idx % len(color_cycle)] for idx, gnn in enumerate(gnns_for_group)
+            }
+
+            boxplot = ax.boxplot(data_groups, positions=positions, widths=width, patch_artist=True)
+            for idx, box in enumerate(boxplot["boxes"]):
+                gnn = gnns_for_group[idx % num_gnns]
+                color = algorithm_colors.get(gnn, fallback_colors[gnn])
+                box.set_facecolor(color)
+                box.set_edgecolor("black")
+            for whisker in boxplot["whiskers"]:
+                whisker.set_color("black")
+            for cap in boxplot["caps"]:
+                cap.set_color("black")
+            for median in boxplot["medians"]:
+                median.set_color("white")
+                median.set_linewidth(1.5)
+            for flier in boxplot.get("fliers", []):
+                flier.set_markeredgecolor("black")
+
+            xtick_positions = [
+                operation_idx * (num_gnns + gap) + (num_gnns - 1) / 2
+                for operation_idx in range(len(include_operations))
+            ]
+            ax.set_xticks(xtick_positions)
+            ax.set_xticklabels(include_operations, rotation=15, ha="right")
+            ax.set_ylabel("Percentage of Decision Changes")
+            ax.set_ylim(*y_limits_by_dataset_split[(dataset, split_name)])
+
+            figure.tight_layout()
+            out_png = base_dir / (
+                f"flips_per_operation_relative_combined__{_slugify((dataset, strategy, split_name))}.png"
+            )
+            figure.savefig(out_png, dpi=150)
+            plt.close(figure)
+
     def _write_flips_statistics_outputs(self) -> None:
         base_dir = self.output_dir / "experiments_flips_statistics"
         base_dir.mkdir(parents=True, exist_ok=True)
@@ -811,6 +974,57 @@ class ExperimentRunner:
                     plt.close(figure)
 
     def _write_class_change_heatmap_outputs(self, flipping_only: bool) -> None:
+        heatmap_tick_fontsize = 20
+        heatmap_annotation_fontsize = 24
+
+        def _collect_mode_summary_stats(
+            totals: Dict[Tuple[str, str, str, str, str, str], float],
+            counts: Dict[Tuple[str, str, str, str, str, str], int],
+        ) -> Dict[Tuple[str, str, str, str, str], Tuple[float, float]]:
+            mode_summary_stats: Dict[Tuple[str, str, str, str, str], Tuple[float, float]] = {}
+            for dataset, gnn, strategy in sorted(present_triples):
+                for class_name in self.class_columns:
+                    for operation_name in FLIPS_PER_OPERATION_NAMES:
+                        stats = RunningStats()
+                        for val_id in selected_vals:
+                            if (dataset, gnn, strategy, val_id) not in self.class_change_present:
+                                continue
+                            key = (dataset, gnn, strategy, val_id, operation_name, class_name)
+                            total = totals.get(key, 0.0)
+                            count = counts.get(key, 0)
+                            stats.add((total / count) if count > 0 else 0.0)
+                        mode_summary_stats[(dataset, strategy, class_name, gnn, operation_name)] = (
+                            stats.mean(),
+                            stats.std(),
+                        )
+            return mode_summary_stats
+
+        def _shared_color_limits(
+            dataset: str,
+            strategy: str,
+            class_name: str,
+            primary_stats: Dict[Tuple[str, str, str, str, str], Tuple[float, float]],
+            secondary_stats: Dict[Tuple[str, str, str, str, str], Tuple[float, float]],
+            gnns_sorted: List[str],
+        ) -> Tuple[float, float]:
+            values = []
+            for stats_map in (primary_stats, secondary_stats):
+                for gnn in gnns_sorted:
+                    for operation_name in FLIPS_PER_OPERATION_NAMES:
+                        mean_value, _ = stats_map.get((dataset, strategy, class_name, gnn, operation_name), (0.0, 0.0))
+                        values.append(mean_value)
+            if not values:
+                return (0.0, 1.0)
+            vmin = min(values)
+            vmax = max(values)
+            if math.isclose(vmin, vmax):
+                if math.isclose(vmin, 0.0):
+                    return (0.0, 1.0)
+                if vmin > 0.0:
+                    return (0.0, vmin)
+                return (vmin, 0.0)
+            return (vmin, vmax)
+
         if flipping_only:
             base_dir = self.output_dir / "experiments_class_change_heatmaps_flipping_only"
             fold_filename = "class_change_heatmaps_flipping_only_fold_values.csv"
@@ -922,10 +1136,17 @@ class ExperimentRunner:
                     )
                     summary_stats[(dataset, strategy, class_name, gnn, operation_name)] = (stats.mean(), stats.std())
 
+            alternate_summary_stats = _collect_mode_summary_stats(
+                self.class_change_flipping_total if not flipping_only else self.class_change_total,
+                self.class_change_flipping_count if not flipping_only else self.class_change_count,
+            )
+
             try:
                 import matplotlib
 
                 matplotlib.use("Agg")
+                import matplotlib.cm as cm
+                import matplotlib.colors as colors
                 import matplotlib.pyplot as plt
                 import numpy as np
             except ImportError:
@@ -935,34 +1156,99 @@ class ExperimentRunner:
             gnns_sorted = sorted(self.selected_gnns)
             for dataset, strategy, class_name in sorted(present_trios_for_plot):
                 data = np.zeros((len(gnns_sorted), len(FLIPS_PER_OPERATION_NAMES)))
-                annotations = [["" for _ in FLIPS_PER_OPERATION_NAMES] for _ in gnns_sorted]
+                mean_annotations = [["" for _ in FLIPS_PER_OPERATION_NAMES] for _ in gnns_sorted]
+                mean_std_annotations = [["" for _ in FLIPS_PER_OPERATION_NAMES] for _ in gnns_sorted]
+                vmin, vmax = _shared_color_limits(
+                    dataset,
+                    strategy,
+                    class_name,
+                    summary_stats,
+                    alternate_summary_stats,
+                    gnns_sorted,
+                )
                 for row_idx, gnn in enumerate(gnns_sorted):
                     for col_idx, operation_name in enumerate(FLIPS_PER_OPERATION_NAMES):
                         mean_value, std_value = summary_stats.get(
                             (dataset, strategy, class_name, gnn, operation_name), (0.0, 0.0)
                         )
                         data[row_idx, col_idx] = mean_value
-                        annotations[row_idx][col_idx] = f"{mean_value:.3f}\n+-{std_value:.3f}"
+                        mean_annotations[row_idx][col_idx] = f"{mean_value:.2f}"
+                        mean_std_annotations[row_idx][col_idx] = f"{mean_value:.2f}\n+- {std_value:.2f}"
 
-                figure = plt.figure(figsize=(12, 6))
-                ax = figure.add_subplot(111)
-                image = ax.imshow(data, cmap="viridis", aspect="auto")
-                ax.set_xticks(range(len(FLIPS_PER_OPERATION_NAMES)))
-                ax.set_xticklabels(FLIPS_PER_OPERATION_NAMES, rotation=25, ha="right")
-                ax.set_yticks(range(len(gnns_sorted)))
-                ax.set_yticklabels(gnns_sorted)
-                ax.set_xlabel("Graph Edit Operation")
-                ax.set_ylabel("GNN Algorithm")
                 mode_suffix = "flipping_only" if flipping_only else "all_operations"
-                ax.set_title(f"{dataset} | {strategy} | {class_name} | {mode_suffix}")
-                for row_idx in range(len(gnns_sorted)):
-                    for col_idx in range(len(FLIPS_PER_OPERATION_NAMES)):
-                        ax.text(col_idx, row_idx, annotations[row_idx][col_idx], ha="center", va="center", color="white")
-                figure.colorbar(image)
-                figure.tight_layout()
-                out_png = base_dir / f"class_change_heatmap__{_slugify((dataset, strategy, class_name, mode_suffix))}.png"
-                figure.savefig(out_png, dpi=150)
-                plt.close(figure)
+                output_slug = _slugify((dataset, strategy, class_name, mode_suffix))
+
+                def _save_heatmap_variant(
+                    filename_suffix: str,
+                    annotations: Optional[List[List[str]]],
+                ) -> None:
+                    figure = plt.figure(figsize=(12, 6))
+                    ax = figure.add_subplot(111)
+                    ax.imshow(data, cmap="viridis", aspect="auto", vmin=vmin, vmax=vmax)
+                    ax.set_xticks(range(len(FLIPS_PER_OPERATION_NAMES)))
+                    ax.set_xticklabels(
+                        FLIPS_PER_OPERATION_NAMES,
+                        rotation=25,
+                        ha="right",
+                        fontsize=heatmap_tick_fontsize,
+                    )
+                    ax.set_yticks(range(len(gnns_sorted)))
+                    ax.set_yticklabels(
+                        [_display_gnn_label(gnn) for gnn in gnns_sorted],
+                        fontsize=heatmap_tick_fontsize,
+                    )
+                    if annotations is not None:
+                        for annotation_row_idx in range(len(gnns_sorted)):
+                            for annotation_col_idx in range(len(FLIPS_PER_OPERATION_NAMES)):
+                                ax.text(
+                                    annotation_col_idx,
+                                    annotation_row_idx,
+                                    annotations[annotation_row_idx][annotation_col_idx],
+                                    ha="center",
+                                    va="center",
+                                    color="white",
+                                    fontsize=heatmap_annotation_fontsize,
+                                )
+                    figure.tight_layout()
+                    out_png = base_dir / f"class_change_heatmap__{output_slug}{filename_suffix}.png"
+                    figure.savefig(out_png, dpi=150)
+                    plt.close(figure)
+
+                _save_heatmap_variant("__no_numbers", None)
+                _save_heatmap_variant("", mean_annotations)
+                _save_heatmap_variant("__mean_std", mean_std_annotations)
+
+                norm = colors.Normalize(vmin=vmin, vmax=vmax)
+                scalar_mappable = cm.ScalarMappable(norm=norm, cmap="viridis")
+                scalar_mappable.set_array([])
+                legend_ticks = [vmin, (vmin + vmax) / 2, vmax]
+                legend_tick_labels = [f"{value:.2f}" for value in legend_ticks]
+
+                legend_figure = plt.figure(figsize=(2.6, 4.2))
+                legend_ax = legend_figure.add_axes([0.18, 0.12, 0.10, 0.76])
+                colorbar = legend_figure.colorbar(scalar_mappable, cax=legend_ax)
+                colorbar.set_ticks(legend_ticks)
+                colorbar.set_ticklabels(legend_tick_labels)
+                colorbar.ax.tick_params(labelsize=20)
+                colorbar.set_label("Mean Class Change", fontsize=22, labelpad=14)
+                legend_png = base_dir / f"class_change_heatmap_legend__{output_slug}.png"
+                legend_figure.savefig(legend_png, dpi=150, bbox_inches="tight", pad_inches=0.12)
+                plt.close(legend_figure)
+
+                horizontal_legend_figure = plt.figure(figsize=(4.8, 1.4))
+                horizontal_legend_ax = horizontal_legend_figure.add_axes([0.12, 0.48, 0.76, 0.18])
+                horizontal_colorbar = horizontal_legend_figure.colorbar(
+                    scalar_mappable,
+                    cax=horizontal_legend_ax,
+                    orientation="horizontal",
+                )
+                horizontal_colorbar.set_ticks(legend_ticks)
+                horizontal_colorbar.set_ticklabels(legend_tick_labels)
+                horizontal_colorbar.ax.tick_params(labelsize=20)
+                horizontal_colorbar.set_label("Mean Class Change", fontsize=22)
+                horizontal_legend_png = base_dir / f"class_change_heatmap_legend_horizontal__{output_slug}.png"
+                horizontal_legend_figure.savefig(horizontal_legend_png, dpi=150, bbox_inches="tight", pad_inches=0.12)
+                plt.close(horizontal_legend_figure)
 
 
 @click.command()

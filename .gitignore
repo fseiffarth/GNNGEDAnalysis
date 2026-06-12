@@ -207,8 +207,10 @@ marimo/_lsp/
 __marimo__/
 
 
+# Project-specific data and outputs
+data/
 Data/
-Results/*
+results/
+results_old/
+tmp/
 .idea
-
-/results/

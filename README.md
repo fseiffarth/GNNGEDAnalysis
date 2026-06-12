@@ -2,12 +2,14 @@
 
 GNNGEDAnalysis is a lightweight experiment wrapper for studying how graph neural
 networks behave along graph edit distance (GED) paths. It trains graph
-classification models with the `simplegnn` framework, evaluates trained models
+classification models with the [`simplegnn`](https://github.com/fseiffarth/SimpleGNN)
+framework, evaluates trained models
 on original graph splits and generated GED path graphs, merges evaluation
 artifacts, and runs post-hoc analyses for decision changes along edit paths.
 
 The GED path graphs themselves are generated upstream by the
-[gedpaths (GNNGED) repository](#generating-the-pipeline-input-with-gedpaths)
+[`gedpaths`](https://github.com/mlai-bonn/gedpaths) repository (see
+[Generating the Pipeline Input with gedpaths](#generating-the-pipeline-input-with-gedpaths))
 and consumed here as PyTorch Geometric datasets.
 
 ## Features
@@ -22,34 +24,14 @@ and consumed here as PyTorch Geometric datasets.
 ## Pipeline Overview
 
 The full workflow consists of an upstream data-generation stage (in the
-`gedpaths`/GNNGED repository) followed by six stages in this repository. Each
+`gedpaths` repository) followed by six stages in this repository. Each
 stage reads the output of the previous one:
 
-```text
-gedpaths (GNNGED repo)                      GNNGEDAnalysis (this repo)
-======================                      ==========================
-
-experiment.sh -db <DB>
-  |- CreateMappings   (GED mappings)
-  |- CreatePaths      (edit paths, 4 strategies)
-  |- AnalyzePaths     (path statistics)
-  `- bgf_to_pt.py     (PyTorch Geometric conversion)
-        |
-        v
-../GNNGED/Results/Paths_<STRATEGY>/<METHOD>/<DB>/
-        |
-        |  (1) copy_ged_graphs.py  (auto-run by evaluate_models.py)
-        v
-data/GEDGraphs/<METHOD>/<DB>_<STRATEGY>/
-        |
-        |  (2) train_models.py              -> trained models under results/<GNN>/
-        |  (3) evaluate_models.py           -> results/<GNN>/path_evaluation/*.pt|*.txt
-        |  (4) analyze_evaluated_results.py -> results/all_results.csv
-        |  (5) utils/enrich_all_results.py  -> results/all_results_enriched.csv
-        v
-        (6) experiments.py / experiments_additional.py
-            -> results/Experiments/, results/ExperimentsAdditional/
-```
+<p align="center">
+  <a href="docs/pipeline.svg">
+    <img src="docs/pipeline.svg" alt="GNNGEDAnalysis pipeline overview: an upstream gedpaths data-generation stage feeding six stages in this repository (copy, train, evaluate, merge, enrich, experiments)." width="780">
+  </a>
+</p>
 
 ### Stage 1 — Copy GED path graphs (`copy_ged_graphs.py`)
 
@@ -145,14 +127,15 @@ split (`train`/`validation`), and correctness of path endpoints.
 ## Generating the Pipeline Input with gedpaths
 
 The input to this pipeline — the GED path graph datasets — is produced by the
-`gedpaths` library (the GNNGED repository, expected as a sibling checkout at
-`../GNNGED`). gedpaths builds on `libGraph` and GEDLIB to compute graph edit
+[`gedpaths`](https://github.com/mlai-bonn/gedpaths) library (expected as a
+sibling checkout at `../GNNGED`). gedpaths builds on `libGraph` and GEDLIB to
+compute graph edit
 distance mappings between graph pairs and to materialize the intermediate
 graphs along the corresponding edit paths.
 
 ### Running the gedpaths pipeline
 
-The simplest way is the bundled experiment script (see the GNNGED README for
+The simplest way is the bundled experiment script (see the gedpaths README for
 build prerequisites; the exact solvers such as `F2` require GUROBI):
 
 ```bash
@@ -292,8 +275,9 @@ Large or generated data is expected under `data/`, `tmp/`, `results/`, and
   package or available at `../SimpleGNN/repo/src` relative to this repository.
 - Python packages used by the scripts: `click`, `joblib`, `torch`, `polars`,
   `pytest`, and optionally `matplotlib` for plots.
-- For generating new input data: a sibling checkout of the gedpaths/GNNGED
-  repository at `../GNNGED` with its C++ tools built (see its
+- For generating new input data: a sibling checkout of the
+  [`gedpaths`](https://github.com/mlai-bonn/gedpaths) repository at `../GNNGED`
+  with its C++ tools built (see its
   `INSTALLATION.md`; exact GED solvers require GUROBI).
 
 This repository does not currently include a `requirements.txt` or packaging

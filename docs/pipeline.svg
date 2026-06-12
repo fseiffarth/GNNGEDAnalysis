@@ -1,0 +1,128 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="940" height="812" viewBox="0 0 940 812" font-family="'Segoe UI', Helvetica, Arial, sans-serif">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#94a3b8"/>
+    </marker>
+    <marker id="arrowDash" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#cbd5e1"/>
+    </marker>
+    <style>
+      .band  { font-size:13px; font-weight:700; letter-spacing:1.5px; }
+      .title { font-size:15px; font-weight:700; font-family:ui-monospace,'SFMono-Regular',Menlo,Consolas,monospace; }
+      .sub   { font-size:12px; fill:#64748b; }
+      .art   { font-size:12px; font-family:ui-monospace,'SFMono-Regular',Menlo,Consolas,monospace; fill:#475569; }
+      .badge { font-size:13px; font-weight:700; fill:#ffffff; }
+      .bul   { font-size:12.5px; font-family:ui-monospace,'SFMono-Regular',Menlo,Consolas,monospace; fill:#334155; }
+      .link  { font-size:11px; font-weight:600; font-family:ui-monospace,'SFMono-Regular',Menlo,Consolas,monospace; fill:#2563eb; text-decoration:underline; }
+    </style>
+  </defs>
+
+  <rect width="940" height="812" fill="#ffffff"/>
+
+  <!-- ============ UPSTREAM ZONE ============ -->
+  <rect x="20" y="20" width="900" height="206" rx="14" fill="#f1f5f9" stroke="#e2e8f0"/>
+  <text x="40" y="46" class="band" fill="#64748b">UPSTREAM &#183; gedpaths (upstream repo)</text>
+
+  <!-- experiment.sh card -->
+  <rect x="40" y="60" width="560" height="148" rx="10" fill="#ffffff" stroke="#e2e8f0"/>
+  <rect x="40" y="60" width="6" height="148" rx="3" fill="#64748b"/>
+  <text x="62" y="86" class="title" fill="#334155">experiment.sh -db &lt;DB&gt;</text>
+  <a href="https://github.com/mlai-bonn/gedpaths" xlink:href="https://github.com/mlai-bonn/gedpaths" target="_blank">
+    <text x="586" y="86" class="link" text-anchor="end">gedpaths &#8599;</text>
+  </a>
+  <text x="62" y="114" class="bul">&#9656;  CreateMappings   &#8212; GED mappings</text>
+  <text x="62" y="138" class="bul">&#9656;  CreatePaths      &#8212; edit paths (4 strategies)</text>
+  <text x="62" y="162" class="bul">&#9656;  AnalyzePaths     &#8212; path statistics</text>
+  <text x="62" y="186" class="bul">&#9656;  bgf_to_pt.py     &#8212; PyTorch Geometric conversion</text>
+
+  <!-- upstream artifact -->
+  <rect x="630" y="112" width="280" height="44" rx="8" fill="#e2e8f0"/>
+  <text x="648" y="132" class="art">Results/Paths_&lt;S&gt;/</text>
+  <text x="648" y="148" class="art">&lt;METHOD&gt;/&lt;DB&gt;/</text>
+  <line x1="600" y1="134" x2="630" y2="134" stroke="#cbd5e1" stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#arrowDash)"/>
+
+  <!-- handoff arrow -->
+  <line x1="320" y1="226" x2="320" y2="262" stroke="#94a3b8" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- ============ THIS REPO ZONE ============ -->
+  <rect x="20" y="262" width="900" height="530" rx="14" fill="#f0fdf4" stroke="#dcfce7"/>
+  <text x="40" y="288" class="band" fill="#15803d">THIS REPO &#183; GNNGEDAnalysis</text>
+
+  <!-- Stage rows: each card x=40 w=540 h=64; artifact x=630 w=280 h=44 -->
+  <!-- STAGE 1 -->
+  <rect x="40" y="306" width="540" height="64" rx="10" fill="#ffffff" stroke="#e2e8f0"/>
+  <rect x="40" y="306" width="6" height="64" rx="3" fill="#0ea5e9"/>
+  <circle cx="78" cy="338" r="15" fill="#0ea5e9"/><text x="78" y="343" class="badge" text-anchor="middle">1</text>
+  <text x="104" y="332" class="title" fill="#0c4a6e">copy_ged_graphs.py</text>
+  <text x="104" y="354" class="sub">Copy GED path-graph datasets into the local layout</text>
+  <rect x="630" y="316" width="280" height="44" rx="8" fill="#e0f2fe"/>
+  <text x="648" y="335" class="art">data/GEDGraphs/&lt;METHOD&gt;/</text>
+  <text x="648" y="351" class="art">&lt;DB&gt;_&lt;STRATEGY&gt;/</text>
+  <line x1="580" y1="338" x2="630" y2="338" stroke="#cbd5e1" stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#arrowDash)"/>
+
+  <!-- STAGE 2 -->
+  <rect x="40" y="386" width="540" height="64" rx="10" fill="#ffffff" stroke="#e2e8f0"/>
+  <rect x="40" y="386" width="6" height="64" rx="3" fill="#6366f1"/>
+  <circle cx="78" cy="418" r="15" fill="#6366f1"/><text x="78" y="423" class="badge" text-anchor="middle">2</text>
+  <text x="104" y="412" class="title" fill="#3730a3">train_models.py</text>
+  <text x="104" y="434" class="sub">Train GNN classifiers (GIN / GCN / GAT / GATv2 / GraphSAGE)</text>
+  <a href="https://github.com/fseiffarth/SimpleGNN" xlink:href="https://github.com/fseiffarth/SimpleGNN" target="_blank">
+    <text x="566" y="412" class="link" text-anchor="end">simplegnn &#8599;</text>
+  </a>
+  <rect x="630" y="396" width="280" height="44" rx="8" fill="#e0e7ff"/>
+  <text x="648" y="415" class="art">results/&lt;GNN&gt;/</text>
+  <text x="648" y="431" class="art">trained model checkpoints</text>
+  <line x1="580" y1="418" x2="630" y2="418" stroke="#cbd5e1" stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#arrowDash)"/>
+
+  <!-- STAGE 3 -->
+  <rect x="40" y="466" width="540" height="64" rx="10" fill="#ffffff" stroke="#e2e8f0"/>
+  <rect x="40" y="466" width="6" height="64" rx="3" fill="#8b5cf6"/>
+  <circle cx="78" cy="498" r="15" fill="#8b5cf6"/><text x="78" y="503" class="badge" text-anchor="middle">3</text>
+  <text x="104" y="492" class="title" fill="#5b21b6">evaluate_models.py</text>
+  <text x="104" y="514" class="sub">Inference on train, validation &amp; all path graphs</text>
+  <a href="https://github.com/fseiffarth/SimpleGNN" xlink:href="https://github.com/fseiffarth/SimpleGNN" target="_blank">
+    <text x="566" y="492" class="link" text-anchor="end">simplegnn &#8599;</text>
+  </a>
+  <rect x="630" y="476" width="280" height="44" rx="8" fill="#ede9fe"/>
+  <text x="648" y="495" class="art">results/&lt;GNN&gt;/path_evaluation/</text>
+  <text x="648" y="511" class="art">*.pt &#183; *.txt</text>
+  <line x1="580" y1="498" x2="630" y2="498" stroke="#cbd5e1" stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#arrowDash)"/>
+
+  <!-- STAGE 4 -->
+  <rect x="40" y="546" width="540" height="64" rx="10" fill="#ffffff" stroke="#e2e8f0"/>
+  <rect x="40" y="546" width="6" height="64" rx="3" fill="#ec4899"/>
+  <circle cx="78" cy="578" r="15" fill="#ec4899"/><text x="78" y="583" class="badge" text-anchor="middle">4</text>
+  <text x="104" y="572" class="title" fill="#9d174d">analyze_evaluated_results.py</text>
+  <text x="104" y="594" class="sub">Merge per-fold outputs, derive flip / correctness columns</text>
+  <rect x="630" y="556" width="280" height="44" rx="8" fill="#fce7f3"/>
+  <text x="648" y="582" class="art">results/all_results.csv</text>
+  <line x1="580" y1="578" x2="630" y2="578" stroke="#cbd5e1" stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#arrowDash)"/>
+
+  <!-- STAGE 5 -->
+  <rect x="40" y="626" width="540" height="64" rx="10" fill="#ffffff" stroke="#e2e8f0"/>
+  <rect x="40" y="626" width="6" height="64" rx="3" fill="#f59e0b"/>
+  <circle cx="78" cy="658" r="15" fill="#f59e0b"/><text x="78" y="663" class="badge" text-anchor="middle">5</text>
+  <text x="104" y="652" class="title" fill="#92400e">utils/enrich_all_results.py</text>
+  <text x="104" y="674" class="sub">Add structural GED metadata (components, cycle counts)</text>
+  <rect x="630" y="636" width="280" height="44" rx="8" fill="#fef3c7"/>
+  <text x="648" y="662" class="art">results/all_results_enriched.csv</text>
+  <line x1="580" y1="658" x2="630" y2="658" stroke="#cbd5e1" stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#arrowDash)"/>
+
+  <!-- STAGE 6 -->
+  <rect x="40" y="706" width="540" height="64" rx="10" fill="#ffffff" stroke="#e2e8f0"/>
+  <rect x="40" y="706" width="6" height="64" rx="3" fill="#10b981"/>
+  <circle cx="78" cy="738" r="15" fill="#10b981"/><text x="78" y="743" class="badge" text-anchor="middle">6</text>
+  <text x="104" y="732" class="title" fill="#065f46">experiments.py &#183; experiments_additional.py</text>
+  <text x="104" y="754" class="sub">Summary tables, flip statistics &amp; class-change plots</text>
+  <rect x="630" y="716" width="280" height="44" rx="8" fill="#d1fae5"/>
+  <text x="648" y="735" class="art">results/Experiments/</text>
+  <text x="648" y="751" class="art">results/ExperimentsAdditional/</text>
+  <line x1="580" y1="738" x2="630" y2="738" stroke="#cbd5e1" stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#arrowDash)"/>
+
+  <!-- vertical connectors between stage cards -->
+  <line x1="78" y1="370" x2="78" y2="386" stroke="#94a3b8" stroke-width="2" marker-end="url(#arrow)"/>
+  <line x1="78" y1="450" x2="78" y2="466" stroke="#94a3b8" stroke-width="2" marker-end="url(#arrow)"/>
+  <line x1="78" y1="530" x2="78" y2="546" stroke="#94a3b8" stroke-width="2" marker-end="url(#arrow)"/>
+  <line x1="78" y1="610" x2="78" y2="626" stroke="#94a3b8" stroke-width="2" marker-end="url(#arrow)"/>
+  <line x1="78" y1="690" x2="78" y2="706" stroke="#94a3b8" stroke-width="2" marker-end="url(#arrow)"/>
+</svg>

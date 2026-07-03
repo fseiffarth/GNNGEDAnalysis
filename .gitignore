@@ -214,3 +214,8 @@ results/
 results_old/
 tmp/
 .idea
+
+# Local editor/tool state
+.claude/
+.eldrun/
+project.json

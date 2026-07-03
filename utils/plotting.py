@@ -16,8 +16,8 @@ def _import_framework_main():
         from simplegnn.framework.core import FrameworkMain
         return FrameworkMain
     except ImportError:
-        repo_root = Path(__file__).resolve().parent
-        simplegnn_src = repo_root.parent / "SimpleGNN" / "repo" / "src"
+        repo_root = Path(__file__).resolve().parents[1]
+        simplegnn_src = repo_root.parent / "SimpleGNN" / "src"
         sys.path.append(str(simplegnn_src))
         try:
             from simplegnn.framework.core import FrameworkMain

@@ -1,0 +1,27 @@
+device: cpu
+mode: experiments
+precision: double
+
+optimizer:
+  - Adam
+
+loss:
+  - BCEWithLogitsLoss
+
+batch_size:
+  - 32
+learning_rate:
+  - 0.001
+epochs:
+  - 500
+
+early_stopping:
+  enabled:
+    False
+  patience:
+    25
+
+training_data_sampling: { type: 'undersampling' }
+input_features: {name: all, transformation: 'one_hot_labels_normalize_features'}
+save_best_model: True
+evaluation_metric: roc_auc

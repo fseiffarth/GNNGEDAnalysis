@@ -1,0 +1,62 @@
+# main configuration file for running graph classification experiments with classical GNNs on the ogbg-molhiv dataset.
+datasets:
+  - {
+        name: "ogbg-molhiv",
+        source: "OGB_GraphProp",
+        task: "graph_classification",
+        paths: {
+          data: "data/OGB/",
+          results: "results/GIN/",
+          models: "configs/ogbg-molhiv/models_GIN.yml",
+          hyperparameters: "configs/ogbg-molhiv/parameters.yml",
+          splits: "splits/ogbg-molhiv_splits.json",
+        }
+    }
+  - {
+        name: "ogbg-molhiv",
+        source: "OGB_GraphProp",
+        task: "graph_classification",
+        paths: {
+          data: "data/OGB/",
+          results: "results/GCN/",
+          models: "configs/ogbg-molhiv/models_GCN.yml",
+          hyperparameters: "configs/ogbg-molhiv/parameters.yml",
+          splits: "splits/ogbg-molhiv_splits.json",
+        }
+    }
+  - {
+    name: "ogbg-molhiv",
+    source: "OGB_GraphProp",
+    task: "graph_classification",
+    paths: {
+      data: "data/OGB/",
+      results: "results/GAT/",
+      models: "configs/ogbg-molhiv/models_GAT.yml",
+      hyperparameters: "configs/ogbg-molhiv/parameters.yml",
+      splits: "splits/ogbg-molhiv_splits.json",
+    }
+  }
+  - {
+    name: "ogbg-molhiv",
+    source: "OGB_GraphProp",
+    task: "graph_classification",
+    paths: {
+      data: "data/OGB/",
+      results: "results/GATv2/",
+      models: "configs/ogbg-molhiv/models_GATv2.yml",
+      hyperparameters: "configs/ogbg-molhiv/parameters.yml",
+      splits: "splits/ogbg-molhiv_splits.json",
+    }
+  }
+  - {
+    name: "ogbg-molhiv",
+    source: "OGB_GraphProp",
+    task: "graph_classification",
+    paths: {
+      data: "data/OGB/",
+      results: "results/GraphSAGE/",
+      models: "configs/ogbg-molhiv/models_GraphSAGE.yml",
+      hyperparameters: "configs/ogbg-molhiv/parameters.yml",
+      splits: "splits/ogbg-molhiv_splits.json",
+    }
+  }

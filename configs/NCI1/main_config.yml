@@ -10,7 +10,7 @@ datasets:
           results: "results/GIN/", # path to save the results
           models: "configs/NCI1/models_GIN.yml", # path to the model configuration file
           hyperparameters: "configs/NCI1/parameters.yml", # path to the hyperparameters configuration file
-          splits: "../SimpleGNN/repo/src/simplegnn/datasets/splits/tu_splits/NCI1_splits.json", # path to the data splits file (contains train/val/test splits)
+          splits: "../SimpleGNN/src/simplegnn/datasets/splits/tu_splits/NCI1_splits.json", # path to the data splits file (contains train/val/test splits)
         }
     }
   - {
@@ -23,7 +23,7 @@ datasets:
           results: "results/GCN/", # path to save the results
           models: "configs/NCI1/models_GCN.yml", # path to the model configuration file
           hyperparameters: "configs/NCI1/parameters.yml", # path to the hyperparameters configuration file
-          splits: "../SimpleGNN/repo/src/simplegnn/datasets/splits/tu_splits/NCI1_splits.json", # path to the data splits file (contains train/val/test splits)
+          splits: "../SimpleGNN/src/simplegnn/datasets/splits/tu_splits/NCI1_splits.json", # path to the data splits file (contains train/val/test splits)
         }
     }
   - {
@@ -36,7 +36,7 @@ datasets:
       results: "results/GAT/", # path to save the results
       models: "configs/NCI1/models_GAT.yml", # path to the model configuration file
       hyperparameters: "configs/NCI1/parameters.yml", # path to the hyperparameters configuration file
-      splits: "../SimpleGNN/repo/src/simplegnn/datasets/splits/tu_splits/NCI1_splits.json", # path to the data splits file (contains train/val/test splits)
+      splits: "../SimpleGNN/src/simplegnn/datasets/splits/tu_splits/NCI1_splits.json", # path to the data splits file (contains train/val/test splits)
     }
   }
   - {
@@ -49,7 +49,7 @@ datasets:
       results: "results/GATv2/", # path to save the results
       models: "configs/NCI1/models_GATv2.yml", # path to the model configuration file
       hyperparameters: "configs/NCI1/parameters.yml", # path to the hyperparameters configuration file
-      splits: "../SimpleGNN/repo/src/simplegnn/datasets/splits/tu_splits/NCI1_splits.json", # path to the data splits file (contains train/val/test splits)
+      splits: "../SimpleGNN/src/simplegnn/datasets/splits/tu_splits/NCI1_splits.json", # path to the data splits file (contains train/val/test splits)
     }
   }
   - {
@@ -62,7 +62,7 @@ datasets:
       results: "results/GraphSAGE/", # path to save the results
       models: "configs/NCI1/models_GraphSAGE.yml", # path to the model configuration file
       hyperparameters: "configs/NCI1/parameters.yml", # path to the hyperparameters configuration file
-      splits: "../SimpleGNN/repo/src/simplegnn/datasets/splits/tu_splits/NCI1_splits.json", # path to the data splits file (contains train/val/test splits)
+      splits: "../SimpleGNN/src/simplegnn/datasets/splits/tu_splits/NCI1_splits.json", # path to the data splits file (contains train/val/test splits)
     }
   }
 

@@ -1,0 +1,9 @@
+# Analysis & statistical-validation tooling.
+# (Model training additionally needs torch / torch_geometric / ogb — installed
+# separately into the shared GNNGED venv.)
+click>=8.1
+numpy>=1.24
+pandas>=2.0
+matplotlib>=3.7
+scipy>=1.10
+statsmodels>=0.14

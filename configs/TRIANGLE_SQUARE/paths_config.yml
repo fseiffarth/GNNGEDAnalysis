@@ -1,0 +1,53 @@
+datasets:
+  - {
+        # all the options are mandatory (paths should be relative to the PYTHONPATH path)
+        name: "TRIANGLE_SQUARE_Rnd", # dataset name
+        source: "path",  # dataset source type
+        task: "graph_classification", # task type
+        paths: {
+          data: "data/GEDGraphs/F2/", # path to the dataset (will be downloaded if not present)
+          results: "results/GIN/", # path to save the results
+          models: "configs/TRIANGLE_SQUARE/models_GIN.yml", # path to the model configuration file
+          hyperparameters: "configs/TRIANGLE_SQUARE/parameters.yml", # path to the hyperparameters configuration file
+          splits: "splits/TRIANGLE_SQUARE_splits.json", # path to the data splits file (contains train/val/test splits)
+        }
+    }
+  - {
+    # all the options are mandatory (paths should be relative to the PYTHONPATH path)
+    name: "TRIANGLE_SQUARE_Rnd_d-IsoN", # dataset name
+    source: "path",  # dataset source type
+    task: "graph_classification", # task type
+    paths: {
+      data: "data/GEDGraphs/F2/", # path to the dataset (will be downloaded if not present)
+      results: "results/GIN/", # path to save the results
+      models: "configs/TRIANGLE_SQUARE/models_GIN.yml", # path to the model configuration file
+      hyperparameters: "configs/TRIANGLE_SQUARE/parameters.yml", # path to the hyperparameters configuration file
+      splits: "splits/TRIANGLE_SQUARE_splits.json", # path to the data splits file (contains train/val/test splits)
+    }
+  }
+  - {
+    # all the options are mandatory (paths should be relative to the PYTHONPATH path)
+    name: "TRIANGLE_SQUARE_i-E_d-IsoN", # dataset name
+    source: "path",  # dataset source type
+    task: "graph_classification", # task type
+    paths: {
+      data: "data/GEDGraphs/F2/", # path to the dataset (will be downloaded if not present)
+      results: "results/GIN/", # path to save the results
+      models: "configs/TRIANGLE_SQUARE/models_GIN.yml", # path to the model configuration file
+      hyperparameters: "configs/TRIANGLE_SQUARE/parameters.yml", # path to the hyperparameters configuration file
+      splits: "splits/TRIANGLE_SQUARE_splits.json", # path to the data splits file (contains train/val/test splits)
+    }
+  }
+  - {
+    # all the options are mandatory (paths should be relative to the PYTHONPATH path)
+    name: "TRIANGLE_SQUARE_d-E_d-IsoN", # dataset name
+    source: "path",  # dataset source type
+    task: "graph_classification", # task type
+    paths: {
+      data: "data/GEDGraphs/F2/", # path to the dataset (will be downloaded if not present)
+      results: "results/GIN/", # path to save the results
+      models: "configs/TRIANGLE_SQUARE/models_GIN.yml", # path to the model configuration file
+      hyperparameters: "configs/TRIANGLE_SQUARE/parameters.yml", # path to the hyperparameters configuration file
+      splits: "splits/TRIANGLE_SQUARE_splits.json", # path to the data splits file (contains train/val/test splits)
+    }
+  }

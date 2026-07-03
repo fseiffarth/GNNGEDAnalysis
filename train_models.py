@@ -17,7 +17,7 @@ def _import_framework_main():
         return FrameworkMain
     except ImportError:
         repo_root = Path(__file__).resolve().parent
-        simplegnn_src = repo_root.parent / "SimpleGNN" / "repo" / "src"
+        simplegnn_src = repo_root.parent / "SimpleGNN" / "src"
         sys.path.append(str(simplegnn_src))
         try:
             from simplegnn.framework.core import FrameworkMain
@@ -56,6 +56,17 @@ def _validate_requested_dbs(dbs, configs_root=CONFIGS_ROOT):
         )
 
 
+def _ensure_splits_loaded(experiment):
+    # Preprocessing may run in joblib subprocesses; in-place split loading is
+    # then lost in the parent process, so reload any missing splits here.
+    from simplegnn.framework.utils.preprocessing import load_splits
+
+    for configurations in experiment.network_configurations.values():
+        for configuration in configurations:
+            if configuration.get("splits") is None:
+                configuration["splits"] = load_splits(configuration["paths"]["splits"])
+
+
 def train_ged(num_threads=-1, dbs=("MUTAG",)):
     _validate_requested_dbs(dbs)
     framework_main_cls = _import_framework_main()
@@ -64,6 +75,7 @@ def train_ged(num_threads=-1, dbs=("MUTAG",)):
         # Load and preprocess the experiment
         experiment = framework_main_cls(Path(f"configs/{db}/main_config.yml"))
         experiment.preprocessing(num_threads=num_threads)
+        _ensure_splits_loaded(experiment)
 
         # Run and evaluate all configurations defined in the config file
         experiment.run_configurations(num_threads=num_threads)

@@ -9,7 +9,7 @@ datasets:
           results: "results/GIN/", # path to save the results
           models: "configs/PTC_FM/models_GIN.yml", # path to the model configuration file
           hyperparameters: "configs/PTC_FM/parameters.yml", # path to the hyperparameters configuration file
-          splits: "../SimpleGNN/repo/src/simplegnn/datasets/splits/tu_splits/PTC_FM_splits.json", # path to the data splits file (contains train/val/test splits)
+          splits: "../SimpleGNN/src/simplegnn/datasets/splits/tu_splits/PTC_FM_splits.json", # path to the data splits file (contains train/val/test splits)
         }
     }
   - {
@@ -22,7 +22,7 @@ datasets:
       results: "results/GIN/", # path to save the results
       models: "configs/PTC_FM/models_GIN.yml", # path to the model configuration file
       hyperparameters: "configs/PTC_FM/parameters.yml", # path to the hyperparameters configuration file
-      splits: "../SimpleGNN/repo/src/simplegnn/datasets/splits/tu_splits/PTC_FM_splits.json", # path to the data splits file (contains train/val/test splits)
+      splits: "../SimpleGNN/src/simplegnn/datasets/splits/tu_splits/PTC_FM_splits.json", # path to the data splits file (contains train/val/test splits)
     }
   }
   - {
@@ -35,6 +35,6 @@ datasets:
       results: "results/GIN/", # path to save the results
       models: "configs/PTC_FM/models_GIN.yml", # path to the model configuration file
       hyperparameters: "configs/PTC_FM/parameters.yml", # path to the hyperparameters configuration file
-      splits: "../SimpleGNN/repo/src/simplegnn/datasets/splits/tu_splits/PTC_FM_splits.json", # path to the data splits file (contains train/val/test splits)
+      splits: "../SimpleGNN/src/simplegnn/datasets/splits/tu_splits/PTC_FM_splits.json", # path to the data splits file (contains train/val/test splits)
     }
   }

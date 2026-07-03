@@ -103,7 +103,12 @@ class MainEvaluation():
         strategy_files = [f for f in files if strategy in f and dataset_name + '_' in f]
         dataset_files = [f for f in files if dataset_name + '_' in f or dataset_name + '.' in f]
         # separate files into path_results_files, training_results_files, validation_results_files
-        self.path_results_files = [f for f in strategy_files if 'path_results' in f and f.endswith('.pt')]
+        # match the exact strategy suffix so e.g. 'Rnd' does not also match 'Rnd_d-IsoN'
+        self.path_results_files = [
+            f
+            for f in strategy_files
+            if 'path_results' in f and f.endswith(f'_{dataset_name}_{strategy}.pt')
+        ]
         self.training_results_files = [f for f in dataset_files if 'train_results' in f and f.endswith('.pt')]
         self.validation_results_files = [f for f in dataset_files if 'validation_results' in f and f.endswith('.pt')]
 
@@ -165,7 +170,9 @@ class MainEvaluation():
         ds_paths = ds_paths.filter(polars.col('column_0') >= 0)
         ds_paths = ds_paths.filter(polars.col('column_2') >= 0)
         # delete broken rows where column_0 is not an integer, i.e., has non-zero decimal part
-        ds_paths = ds_paths.filter(polars.col('column_0').cast(polars.Int64) == polars.col('column_0'))
+        # use a non-strict cast so out-of-range/overflow garbage values (e.g. 1.6e33) become
+        # null and are filtered out instead of raising during the Int64 conversion
+        ds_paths = ds_paths.filter(polars.col('column_0').cast(polars.Int64, strict=False) == polars.col('column_0'))
         ds_training = polars.DataFrame(training_results)
         ds_validation = polars.DataFrame(validation_results)
         # add the column names

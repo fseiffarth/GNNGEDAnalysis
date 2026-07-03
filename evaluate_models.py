@@ -46,7 +46,7 @@ def _load_simplegnn_symbols():
         )
     except ImportError:
         repo_root = Path(__file__).resolve().parent
-        simplegnn_src = repo_root.parent / "SimpleGNN" / "repo" / "src"
+        simplegnn_src = repo_root.parent / "SimpleGNN" / "src"
         sys.path.append(str(simplegnn_src))
         try:
             from simplegnn.framework.core import FrameworkMain, preprocess_graph_data
@@ -299,6 +299,12 @@ def evaluate_single_task(num_threads=1, db="MUTAG", path_strategy="i-E_d-IsoN", 
 
     experiment_base = FrameworkMain(Path(f"configs/{db}/main_config.yml"))
     experiment_base.preprocessing(num_threads=num_threads)
+    # Preprocessing may run in joblib subprocesses; in-place split loading is
+    # then lost in the parent process, so reload any missing splits here.
+    for configurations in experiment_base.network_configurations.values():
+        for configuration in configurations:
+            if configuration.get("splits") is None:
+                configuration["splits"] = load_splits(configuration["paths"]["splits"])
 
     experiment_paths = FrameworkMain(Path(f"configs/{db}/paths_config.yml"))
     experiment_paths.preprocessing(num_threads=num_threads)

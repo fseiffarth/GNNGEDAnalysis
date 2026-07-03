@@ -196,7 +196,7 @@ dataset `<DB>`. To analyze it here:
    - `main_config.yml` — one entry per architecture pointing at
      `data/TUDatasets/`, `results/<GNN>/`, `models_<GNN>.yml`,
      `parameters.yml`, and the split file (for TU datasets:
-     `../SimpleGNN/repo/src/simplegnn/datasets/splits/tu_splits/<DB>_splits.json`;
+     `../SimpleGNN/src/simplegnn/datasets/splits/tu_splits/<DB>_splits.json`;
      custom split files live under `splits/`).
    - `paths_config.yml` — one entry per path strategy with
      `name: "<DB>_<STRATEGY>"`, `source: "path"`, and
@@ -207,7 +207,7 @@ dataset `<DB>`. To analyze it here:
    > **Note:** The train/validation/test split file is the one input that is
    > *not* produced by gedpaths. For the classical TU datasets, ready-made
    > splits ship with SimpleGNN under
-   > `../SimpleGNN/repo/src/simplegnn/datasets/splits/tu_splits/<DB>_splits.json`.
+   > `../SimpleGNN/src/simplegnn/datasets/splits/tu_splits/<DB>_splits.json`.
    > For any other dataset you must provide a split JSON yourself (place it
    > under `splits/` in this repository and reference it from
    > `main_config.yml` and `paths_config.yml`; see the existing files in
@@ -272,7 +272,7 @@ Large or generated data is expected under `data/`, `tmp/`, `results/`, and
 
 - Python 3.9 or newer.
 - [`simplegnn`](https://github.com/fseiffarth/SimpleGNN), either installed as a
-  package or available at `../SimpleGNN/repo/src` relative to this repository.
+  package or available at `../SimpleGNN/src` relative to this repository.
 - Python packages used by the scripts: `click`, `joblib`, `torch`, `polars`,
   `pytest`, and optionally `matplotlib` for plots.
 - For generating new input data: a sibling checkout of the
@@ -297,7 +297,7 @@ python -m pip install click joblib torch polars pytest matplotlib
 
 If `simplegnn` is not installed, clone the
 [SimpleGNN repository](https://github.com/fseiffarth/SimpleGNN) next to this
-repository so that `../SimpleGNN/repo/src` exists, or install it into the active
+repository so that `../SimpleGNN/src` exists, or install it into the active
 environment.
 
 ## Configuration
